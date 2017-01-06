@@ -1,0 +1,493 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+
+<html lang="en">
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  <title>LCOV - Thread Safe HashMap Coverage - /home/vanand/Tests/CeleraOne/Task2/Bucket.h</title>
+  <link rel="stylesheet" type="text/css" href="../../../../../gcov.css">
+</head>
+
+<body>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="title">LCOV - code coverage report</td></tr>
+    <tr><td class="ruler"><img src="../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+
+    <tr>
+      <td width="100%">
+        <table cellpadding=1 border=0 width="100%">
+          <tr>
+            <td width="10%" class="headerItem">Current view:</td>
+            <td width="35%" class="headerValue"><a href="../../../../../index.html">top level</a> - <a href="index.html">home/vanand/Tests/CeleraOne/Task2</a> - Bucket.h<span style="font-size: 80%;"> (source / <a href="Bucket.h.func-sort-c.html">functions</a>)</span></td>
+            <td width="5%"></td>
+            <td width="15%"></td>
+            <td width="10%" class="headerCovTableHead">Hit</td>
+            <td width="10%" class="headerCovTableHead">Total</td>
+            <td width="15%" class="headerCovTableHead">Coverage</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Test:</td>
+            <td class="headerValue">Thread Safe HashMap Coverage</td>
+            <td></td>
+            <td class="headerItem">Lines:</td>
+            <td class="headerCovTableEntry">115</td>
+            <td class="headerCovTableEntry">115</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr>
+            <td class="headerItem">Date:</td>
+            <td class="headerValue">2016-12-12 17:27:28</td>
+            <td></td>
+            <td class="headerItem">Functions:</td>
+            <td class="headerCovTableEntry">27</td>
+            <td class="headerCovTableEntry">27</td>
+            <td class="headerCovTableEntryHi">100.0 %</td>
+          </tr>
+          <tr><td><img src="../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+        </table>
+      </td>
+    </tr>
+
+    <tr><td class="ruler"><img src="../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+  </table>
+
+  <table cellpadding=0 cellspacing=0 border=0>
+    <tr>
+      <td><br></td>
+    </tr>
+    <tr>
+      <td>
+<pre class="sourceHeading">          Line data    Source code</pre>
+<pre class="source">
+<a name="1"><span class="lineNum">       1 </span>            : #pragma once</a>
+<span class="lineNum">       2 </span>            : 
+<span class="lineNum">       3 </span>            : #include &lt;cstddef&gt;
+<span class="lineNum">       4 </span>            : #include &lt;atomic&gt;
+<span class="lineNum">       5 </span>            : #include &lt;mutex&gt;
+<span class="lineNum">       6 </span>            : 
+<span class="lineNum">       7 </span>            : namespace thread_safe {
+<span class="lineNum">       8 </span>            : 
+<span class="lineNum">       9 </span>            : /*
+<span class="lineNum">      10 </span>            :  * A structure which stores two instances of any type.
+<span class="lineNum">      11 </span>            :  * It's like the std::pair and even implicitly constructs from it.
+<span class="lineNum">      12 </span>            :  * The important difference, which also is the reason of creation
+<span class="lineNum">      13 </span>            :  * of this class is that the std::pair is not trivially copyable,
+<span class="lineNum">      14 </span>            :  * which is the required from std::atomic
+<span class="lineNum">      15 </span>            :  */
+<span class="lineNum">      16 </span>            : template &lt;typename T1, typename T2&gt;
+<span class="lineNum">      17 </span>            : struct Pair
+<span class="lineNum">      18 </span>            : {
+<span class="lineNum">      19 </span>            :     typedef T1 first_type;
+<span class="lineNum">      20 </span>            :     typedef T2 second_type;
+<span class="lineNum">      21 </span>            : 
+<span class="lineNum">      22 </span>            :     first_type first;
+<a name="23"><span class="lineNum">      23 </span>            :     second_type second;</a>
+<span class="lineNum">      24 </span>            : 
+<span class="lineNum">      25 </span><span class="lineCov">     103221 :     Pair()</span>
+<span class="lineNum">      26 </span>            :         : first(T1())
+<span class="lineNum">      27 </span><span class="lineCov">     103221 :         , second(T2())</span>
+<a name="28"><span class="lineNum">      28 </span><span class="lineCov">     103221 :     {};</span></a>
+<span class="lineNum">      29 </span>            : 
+<span class="lineNum">      30 </span><span class="lineCov">       3061 :     Pair(const T1&amp; f, const T2&amp; s)</span>
+<span class="lineNum">      31 </span>            :         : first(f)
+<span class="lineNum">      32 </span><span class="lineCov">       3061 :         , second(s)</span>
+<span class="lineNum">      33 </span><span class="lineCov">       3061 :     {}</span>
+<a name="34"><span class="lineNum">      34 </span>            : </a>
+<span class="lineNum">      35 </span>            :     template &lt;typename U1, typename U2&gt;
+<span class="lineNum">      36 </span><span class="lineCov">         12 :     Pair(U1&amp;&amp; f, U2&amp;&amp; s)</span>
+<span class="lineNum">      37 </span><span class="lineCov">         12 :         : first(std::forward&lt;U1&gt;(f))</span>
+<span class="lineNum">      38 </span><span class="lineCov">         12 :         , second(std::forward&lt;U2&gt;(s))</span>
+<span class="lineNum">      39 </span><span class="lineCov">         12 :     {}</span>
+<span class="lineNum">      40 </span>            : 
+<span class="lineNum">      41 </span>            :     template &lt;typename U1, typename U2&gt;
+<span class="lineNum">      42 </span>            :     Pair(const Pair&lt;U1, U2&gt;&amp; that)
+<span class="lineNum">      43 </span>            :         : first(that.first)
+<span class="lineNum">      44 </span>            :         , second(that.second)
+<span class="lineNum">      45 </span>            :     {}
+<a name="46"><span class="lineNum">      46 </span>            : </a>
+<span class="lineNum">      47 </span>            :     template &lt;typename U1, typename U2&gt;
+<span class="lineNum">      48 </span><span class="lineCov">       1001 :     Pair(const std::pair&lt;U1, U2&gt;&amp; that)</span>
+<span class="lineNum">      49 </span>            :         : first(that.first)
+<span class="lineNum">      50 </span><span class="lineCov">       1001 :         , second(that.second)</span>
+<span class="lineNum">      51 </span><span class="lineCov">       1001 :     {}</span>
+<a name="52"><span class="lineNum">      52 </span>            : </a>
+<span class="lineNum">      53 </span>            :     template &lt;typename U1, typename U2&gt;
+<span class="lineNum">      54 </span><span class="lineCov">       1019 :     Pair(Pair&lt;U1, U2&gt;&amp;&amp; that)</span>
+<span class="lineNum">      55 </span><span class="lineCov">       1019 :         : first(std::move(that.first))</span>
+<span class="lineNum">      56 </span><span class="lineCov">       1019 :         , second(std::move(that.second))</span>
+<span class="lineNum">      57 </span><span class="lineCov">       1019 :     {}</span>
+<span class="lineNum">      58 </span>            : };
+<a name="59"><span class="lineNum">      59 </span>            : </a>
+<span class="lineNum">      60 </span>            : template &lt;typename T1, typename T2&gt;
+<span class="lineNum">      61 </span><span class="lineCov">       3061 : Pair&lt;T1, T2&gt; make_pair(const T1&amp; f, const T2&amp; s)</span>
+<span class="lineNum">      62 </span>            : {
+<span class="lineNum">      63 </span><span class="lineCov">       3061 :     return Pair&lt;T1, T2&gt;(f, s);</span>
+<span class="lineNum">      64 </span>            : }
+<span class="lineNum">      65 </span>            : 
+<span class="lineNum">      66 </span>            : /*
+<span class="lineNum">      67 </span>            :  * Each Bucket object is a doubly linked list, and Node
+<span class="lineNum">      68 </span>            :  * is the type of nodes in that list
+<span class="lineNum">      69 </span>            :  */
+<span class="lineNum">      70 </span>            : template &lt;typename ValueT&gt;
+<a name="71"><span class="lineNum">      71 </span>            : struct Node</a>
+<span class="lineNum">      72 </span>            : {
+<span class="lineNum">      73 </span><span class="lineCov">       2186 :     Node()</span>
+<span class="lineNum">      74 </span>            :         : m_prev(nullptr)
+<span class="lineNum">      75 </span>            :         , m_next(nullptr)
+<span class="lineNum">      76 </span><span class="lineCov">       2186 :         , m_value(ValueT())</span>
+<span class="lineNum">      77 </span><span class="lineCov">       2186 :     {}</span>
+<a name="78"><span class="lineNum">      78 </span>            :     Node(const Node&amp;) = delete;</a>
+<span class="lineNum">      79 </span>            :     Node&amp; operator= (const Node&amp;) = delete;
+<span class="lineNum">      80 </span><span class="lineCov">       2036 :     ~Node()</span>
+<span class="lineNum">      81 </span><span class="lineCov">       2036 :     {}</span>
+<span class="lineNum">      82 </span>            : 
+<span class="lineNum">      83 </span>            :     Node* m_prev;
+<span class="lineNum">      84 </span>            :     Node* m_next;
+<span class="lineNum">      85 </span>            :     std::atomic&lt;ValueT&gt; m_value;
+<span class="lineNum">      86 </span>            : };
+<span class="lineNum">      87 </span>            : 
+<span class="lineNum">      88 </span>            : /*
+<span class="lineNum">      89 </span>            :  * HashMap contains an array of Buckets as storage.
+<span class="lineNum">      90 </span>            :  * Each Bucket is a doubly linked list.
+<span class="lineNum">      91 </span>            :  */
+<span class="lineNum">      92 </span>            : template &lt;typename KeyT,
+<span class="lineNum">      93 </span>            :           typename ValueT,
+<span class="lineNum">      94 </span>            :           typename KeyEqualT&gt;
+<span class="lineNum">      95 </span>            : class Bucket
+<span class="lineNum">      96 </span>            : {
+<span class="lineNum">      97 </span>            : public:
+<span class="lineNum">      98 </span>            :     Bucket();
+<span class="lineNum">      99 </span>            :     Bucket(const Bucket&amp;);
+<span class="lineNum">     100 </span>            :     Bucket(Bucket&amp;&amp;);
+<span class="lineNum">     101 </span>            :     Bucket&amp; operator= (const Bucket&amp;);
+<span class="lineNum">     102 </span>            :     Bucket&amp; operator= (Bucket&amp;&amp;);
+<span class="lineNum">     103 </span>            :     ~Bucket();
+<span class="lineNum">     104 </span>            : 
+<span class="lineNum">     105 </span>            :     Pair&lt;Node&lt;ValueT&gt;*, bool&gt; insert(const ValueT&amp; value);
+<span class="lineNum">     106 </span>            :     Node&lt;ValueT&gt;* insert_or_assign(const ValueT&amp; value);
+<span class="lineNum">     107 </span>            :     Node&lt;ValueT&gt;* find(const KeyT&amp; key);
+<span class="lineNum">     108 </span>            :     const Node&lt;ValueT&gt;* find(const KeyT&amp; key) const;
+<span class="lineNum">     109 </span>            :     void erase(const KeyT&amp; key);
+<span class="lineNum">     110 </span>            :     void erase(Node&lt;ValueT&gt;* node);
+<span class="lineNum">     111 </span>            :     void clear();
+<span class="lineNum">     112 </span>            :     std::size_t size() const;
+<span class="lineNum">     113 </span>            :     bool empty() const;
+<span class="lineNum">     114 </span>            :     Node&lt;ValueT&gt;* begin();
+<span class="lineNum">     115 </span>            :     const Node&lt;ValueT&gt;* begin() const;
+<span class="lineNum">     116 </span>            :     Node&lt;ValueT&gt;* end();
+<span class="lineNum">     117 </span>            :     const Node&lt;ValueT&gt;* end() const;
+<span class="lineNum">     118 </span>            : 
+<span class="lineNum">     119 </span>            : private:
+<span class="lineNum">     120 </span>            :     mutable std::recursive_mutex m_mutex;
+<span class="lineNum">     121 </span>            :     std::size_t m_size;
+<span class="lineNum">     122 </span>            :     Node&lt;ValueT&gt;* m_end;
+<span class="lineNum">     123 </span>            :     KeyEqualT m_key_equal;
+<span class="lineNum">     124 </span>            : };
+<span class="lineNum">     125 </span>            : 
+<span class="lineNum">     126 </span>            : #define TEMPLATE_DECL template &lt;typename KeyT, typename ValueT, typename KeyEqualT&gt;
+<span class="lineNum">     127 </span>            : #define CLASS_NAME Bucket&lt;KeyT, ValueT, KeyEqualT&gt;
+<span class="lineNum">     128 </span>            : 
+<span class="lineNum">     129 </span>            : /*
+<span class="lineNum">     130 </span>            :  * Default constructor
+<a name="131"><span class="lineNum">     131 </span>            :  */</a>
+<span class="lineNum">     132 </span>            : TEMPLATE_DECL
+<span class="lineNum">     133 </span><span class="lineCov">        150 : CLASS_NAME::Bucket()</span>
+<span class="lineNum">     134 </span>            :     : m_size(0)
+<span class="lineNum">     135 </span><span class="lineCov">        150 :     , m_end(nullptr)</span>
+<span class="lineNum">     136 </span>            : {
+<span class="lineNum">     137 </span><span class="lineCov">        150 :     m_end = new Node&lt;ValueT&gt;();</span>
+<span class="lineNum">     138 </span><span class="lineCov">        150 :     m_end-&gt;m_next = m_end;</span>
+<span class="lineNum">     139 </span><span class="lineCov">        150 :     m_end-&gt;m_prev = m_end;</span>
+<span class="lineNum">     140 </span><span class="lineCov">        150 : }</span>
+<span class="lineNum">     141 </span>            : 
+<span class="lineNum">     142 </span>            : /*
+<span class="lineNum">     143 </span>            :  * Copy constructor
+<span class="lineNum">     144 </span>            :  */
+<span class="lineNum">     145 </span>            : TEMPLATE_DECL
+<span class="lineNum">     146 </span>            : CLASS_NAME::Bucket(const Bucket&amp; that)
+<span class="lineNum">     147 </span>            :     : m_size(that.m_size)
+<span class="lineNum">     148 </span>            :     , m_end(nullptr)
+<span class="lineNum">     149 </span>            : {
+<span class="lineNum">     150 </span>            :     m_end = new Node&lt;ValueT&gt;();
+<span class="lineNum">     151 </span>            :     m_end-&gt;m_next = m_end;
+<span class="lineNum">     152 </span>            :     m_end-&gt;m_prev = m_end;
+<span class="lineNum">     153 </span>            :     
+<span class="lineNum">     154 </span>            :     // Locks the source so that it won't be modified during the copy
+<span class="lineNum">     155 </span>            :     std::lock_guard&lt;std::recursive_mutex&gt; lck(that.m_mutex);
+<span class="lineNum">     156 </span>            :     Node&lt;ValueT&gt;* node = that.begin();
+<span class="lineNum">     157 </span>            :     while (node != that.end()) {
+<span class="lineNum">     158 </span>            :         Node&lt;ValueT&gt;* new_node = new Node&lt;ValueT&gt;();
+<span class="lineNum">     159 </span>            :         new_node-&gt;m_value.store(node-&gt;m_value.load());
+<span class="lineNum">     160 </span>            :         new_node-&gt;m_next = m_end;
+<span class="lineNum">     161 </span>            :         new_node-&gt;m_prev = m_end-&gt;m_prev;
+<span class="lineNum">     162 </span>            :         new_node-&gt;m_next-&gt;m_prev = new_node;
+<span class="lineNum">     163 </span>            :         new_node-&gt;m_prev-&gt;m_next = new_node;
+<span class="lineNum">     164 </span>            :         node = node-&gt;m_next;
+<span class="lineNum">     165 </span>            :     }
+<span class="lineNum">     166 </span>            : }
+<span class="lineNum">     167 </span>            : 
+<span class="lineNum">     168 </span>            : /*
+<span class="lineNum">     169 </span>            :  * Move constructor
+<span class="lineNum">     170 </span>            :  */
+<span class="lineNum">     171 </span>            : TEMPLATE_DECL
+<span class="lineNum">     172 </span>            : CLASS_NAME::Bucket(Bucket&amp;&amp; that)
+<span class="lineNum">     173 </span>            :     : m_size(that.m_size)
+<span class="lineNum">     174 </span>            :     , m_end(nullptr)
+<span class="lineNum">     175 </span>            : {
+<span class="lineNum">     176 </span>            :     std::lock_guard&lt;std::recursive_mutex&gt; lck(that.m_mutex);
+<span class="lineNum">     177 </span>            :     m_end = that.m_end;
+<span class="lineNum">     178 </span>            :     that.m_end = nullptr;
+<span class="lineNum">     179 </span>            :     m_size = that.m_size;
+<span class="lineNum">     180 </span>            : }
+<span class="lineNum">     181 </span>            : 
+<span class="lineNum">     182 </span>            : /*
+<span class="lineNum">     183 </span>            :  * Copy assignment
+<a name="184"><span class="lineNum">     184 </span>            :  */</a>
+<span class="lineNum">     185 </span>            : TEMPLATE_DECL
+<span class="lineNum">     186 </span><span class="lineCov">         60 : CLASS_NAME&amp; CLASS_NAME::operator= (const Bucket&amp; that)</span>
+<span class="lineNum">     187 </span>            : {
+<span class="lineNum">     188 </span><span class="lineCov">         60 :     if (&amp;that != this) {</span>
+<span class="lineNum">     189 </span>            :         // std::lock is to avoid deadlock in case of cross assignment,
+<span class="lineNum">     190 </span>            :         // i.e. &quot;a = b&quot; in one thread and &quot;b = a&quot; in the other
+<span class="lineNum">     191 </span><span class="lineCov">        120 :         std::unique_lock&lt;std::recursive_mutex&gt; lck_this(m_mutex, std::defer_lock);</span>
+<span class="lineNum">     192 </span><span class="lineCov">        120 :         std::unique_lock&lt;std::recursive_mutex&gt; lck_that(that.m_mutex, std::defer_lock);</span>
+<span class="lineNum">     193 </span><span class="lineCov">         60 :         std::lock(lck_this, lck_that);</span>
+<span class="lineNum">     194 </span><span class="lineCov">         60 :         clear();</span>
+<span class="lineNum">     195 </span><span class="lineCov">         60 :         const Node&lt;ValueT&gt;* node = that.begin();</span>
+<span class="lineNum">     196 </span><span class="lineCov">         92 :         while (node != that.end()) {</span>
+<span class="lineNum">     197 </span><span class="lineCov">         16 :             Node&lt;ValueT&gt;* new_node = new Node&lt;ValueT&gt;();</span>
+<span class="lineNum">     198 </span><span class="lineCov">         16 :             new_node-&gt;m_value.store(node-&gt;m_value.load());</span>
+<span class="lineNum">     199 </span><span class="lineCov">         16 :             new_node-&gt;m_next = m_end;</span>
+<span class="lineNum">     200 </span><span class="lineCov">         16 :             new_node-&gt;m_prev = m_end-&gt;m_prev;</span>
+<span class="lineNum">     201 </span><span class="lineCov">         16 :             new_node-&gt;m_next-&gt;m_prev = new_node;</span>
+<span class="lineNum">     202 </span><span class="lineCov">         16 :             new_node-&gt;m_prev-&gt;m_next = new_node;</span>
+<span class="lineNum">     203 </span><span class="lineCov">         16 :             node = node-&gt;m_next;</span>
+<span class="lineNum">     204 </span>            :         }
+<span class="lineNum">     205 </span><span class="lineCov">         60 :         m_size = that.m_size;</span>
+<span class="lineNum">     206 </span>            :     }
+<span class="lineNum">     207 </span><span class="lineCov">         60 :     return *this;</span>
+<span class="lineNum">     208 </span>            : }
+<span class="lineNum">     209 </span>            : 
+<span class="lineNum">     210 </span>            : /*
+<span class="lineNum">     211 </span>            :  * Move assignment
+<span class="lineNum">     212 </span>            :  */
+<span class="lineNum">     213 </span>            : TEMPLATE_DECL
+<span class="lineNum">     214 </span>            : CLASS_NAME&amp; CLASS_NAME::operator= (Bucket&amp;&amp; that)
+<span class="lineNum">     215 </span>            : {
+<span class="lineNum">     216 </span>            :     if (&amp;that != this) {
+<span class="lineNum">     217 </span>            :         std::unique_lock&lt;std::recursive_mutex&gt; lck_this(m_mutex, std::defer_lock);
+<span class="lineNum">     218 </span>            :         std::unique_lock&lt;std::recursive_mutex&gt; lck_that(that.m_mutex, std::defer_lock);
+<span class="lineNum">     219 </span>            :         std::lock(lck_this, lck_that);
+<span class="lineNum">     220 </span>            :         clear();
+<span class="lineNum">     221 </span>            :         m_end = that.m_end;
+<span class="lineNum">     222 </span>            :         that.m_end = nullptr;
+<span class="lineNum">     223 </span>            :         m_size = that.m_size;
+<span class="lineNum">     224 </span>            :     }
+<span class="lineNum">     225 </span>            :     return *this;
+<span class="lineNum">     226 </span>            : }
+<span class="lineNum">     227 </span>            : 
+<span class="lineNum">     228 </span>            : /*
+<span class="lineNum">     229 </span>            :  * Destructor
+<a name="230"><span class="lineNum">     230 </span>            :  */</a>
+<span class="lineNum">     231 </span>            : TEMPLATE_DECL
+<span class="lineNum">     232 </span><span class="lineCov">        150 : CLASS_NAME::~Bucket()</span>
+<span class="lineNum">     233 </span>            : {
+<span class="lineNum">     234 </span><span class="lineCov">        150 :     clear();</span>
+<span class="lineNum">     235 </span><span class="lineCov">        150 : }</span>
+<span class="lineNum">     236 </span>            : 
+<span class="lineNum">     237 </span>            : /*
+<span class="lineNum">     238 </span>            :  * Insert
+<span class="lineNum">     239 </span>            :  * Locks the container, inserts the given pair if there is no pair
+<span class="lineNum">     240 </span>            :  * with the same key, unlocks the container
+<a name="241"><span class="lineNum">     241 </span>            :  */</a>
+<span class="lineNum">     242 </span>            : TEMPLATE_DECL
+<span class="lineNum">     243 </span><span class="lineCov">       1021 : Pair&lt;Node&lt;ValueT&gt;*, bool&gt; CLASS_NAME::insert(const ValueT&amp; value)</span>
+<span class="lineNum">     244 </span>            : {
+<span class="lineNum">     245 </span><span class="lineCov">       1021 :     Node&lt;ValueT&gt;* result = nullptr;</span>
+<span class="lineNum">     246 </span>            :     {
+<span class="lineNum">     247 </span><span class="lineCov">       2041 :         std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);</span>
+<span class="lineNum">     248 </span><span class="lineCov">       1021 :         result = find(value.first);</span>
+<span class="lineNum">     249 </span><span class="lineCov">       1021 :         if (result != m_end) {</span>
+<span class="lineNum">     250 </span><span class="lineCov">          1 :             return thread_safe::make_pair(result, false);</span>
+<span class="lineNum">     251 </span>            :         }
+<span class="lineNum">     252 </span><span class="lineCov">       1020 :         result = new Node&lt;ValueT&gt;();</span>
+<span class="lineNum">     253 </span><span class="lineCov">       1020 :         result-&gt;m_next = m_end;</span>
+<span class="lineNum">     254 </span><span class="lineCov">       1020 :         result-&gt;m_prev = m_end-&gt;m_prev;</span>
+<span class="lineNum">     255 </span><span class="lineCov">       1020 :         result-&gt;m_next-&gt;m_prev = result;</span>
+<span class="lineNum">     256 </span><span class="lineCov">       1020 :         result-&gt;m_prev-&gt;m_next = result;</span>
+<span class="lineNum">     257 </span><span class="lineCov">       1020 :         ++m_size;</span>
+<span class="lineNum">     258 </span>            :     }
+<span class="lineNum">     259 </span><span class="lineCov">       1020 :     result-&gt;m_value.store(value);</span>
+<span class="lineNum">     260 </span><span class="lineCov">       1020 :     return thread_safe::make_pair(result, true);</span>
+<span class="lineNum">     261 </span>            : }
+<span class="lineNum">     262 </span>            : 
+<span class="lineNum">     263 </span>            : /*
+<span class="lineNum">     264 </span>            :  * Insert or assign
+<span class="lineNum">     265 </span>            :  * Locks the container, inserts the given pair if there is no pair
+<span class="lineNum">     266 </span>            :  * with the same key or replaces the existing with the new otherwise,
+<span class="lineNum">     267 </span>            :  * unlocks the container
+<a name="268"><span class="lineNum">     268 </span>            :  */</a>
+<span class="lineNum">     269 </span>            : TEMPLATE_DECL
+<span class="lineNum">     270 </span><span class="lineCov">       1001 : Node&lt;ValueT&gt;* CLASS_NAME::insert_or_assign(const ValueT&amp; value)</span>
+<span class="lineNum">     271 </span>            : {
+<span class="lineNum">     272 </span><span class="lineCov">       1001 :     Node&lt;ValueT&gt;* result = nullptr;</span>
+<span class="lineNum">     273 </span>            :     {
+<span class="lineNum">     274 </span><span class="lineCov">       2002 :         std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);</span>
+<span class="lineNum">     275 </span><span class="lineCov">       1001 :         result = find(value.first);</span>
+<span class="lineNum">     276 </span><span class="lineCov">       1001 :         if (result == m_end) {</span>
+<span class="lineNum">     277 </span><span class="lineCov">       1000 :             result = new Node&lt;ValueT&gt;();</span>
+<span class="lineNum">     278 </span><span class="lineCov">       1000 :             result-&gt;m_next = m_end;</span>
+<span class="lineNum">     279 </span><span class="lineCov">       1000 :             result-&gt;m_prev = m_end-&gt;m_prev;</span>
+<span class="lineNum">     280 </span><span class="lineCov">       1000 :             result-&gt;m_next-&gt;m_prev = result;</span>
+<span class="lineNum">     281 </span><span class="lineCov">       1000 :             result-&gt;m_prev-&gt;m_next = result;</span>
+<span class="lineNum">     282 </span><span class="lineCov">       1000 :             ++m_size;</span>
+<span class="lineNum">     283 </span>            :         }
+<span class="lineNum">     284 </span>            :     }
+<span class="lineNum">     285 </span><span class="lineCov">       1001 :     result-&gt;m_value.store(value);</span>
+<span class="lineNum">     286 </span><span class="lineCov">       1001 :     return result;</span>
+<span class="lineNum">     287 </span>            : }
+<span class="lineNum">     288 </span>            : 
+<span class="lineNum">     289 </span>            : /*
+<span class="lineNum">     290 </span>            :  * Find
+<span class="lineNum">     291 </span>            :  * Returns a pointer to the node with the key provided
+<a name="292"><span class="lineNum">     292 </span>            :  */</a>
+<span class="lineNum">     293 </span>            : TEMPLATE_DECL
+<span class="lineNum">     294 </span><span class="lineCov">       2030 : Node&lt;ValueT&gt;* CLASS_NAME::find(const KeyT&amp; key)</span>
+<span class="lineNum">     295 </span>            : {
+<span class="lineNum">     296 </span><span class="lineCov">       4060 :     std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);</span>
+<span class="lineNum">     297 </span><span class="lineCov">       2030 :     Node&lt;ValueT&gt;* node = begin();</span>
+<span class="lineNum">     298 </span><span class="lineCov">     200038 :     while (node != end()) {</span>
+<span class="lineNum">     299 </span><span class="lineCov">      99011 :         if (m_key_equal(node-&gt;m_value.load().first, key)) {</span>
+<span class="lineNum">     300 </span><span class="lineCov">          7 :             return node;</span>
+<span class="lineNum">     301 </span>            :         }
+<span class="lineNum">     302 </span><span class="lineCov">      99004 :         node = node-&gt;m_next;</span>
+<span class="lineNum">     303 </span>            :     }
+<span class="lineNum">     304 </span><span class="lineCov">       2023 :     return node;</span>
+<span class="lineNum">     305 </span>            : }
+<span class="lineNum">     306 </span>            : 
+<span class="lineNum">     307 </span>            : /*
+<span class="lineNum">     308 </span>            :  * Find
+<span class="lineNum">     309 </span>            :  * Returns a pointer to the node with the key provided for const objects
+<span class="lineNum">     310 </span>            :  */
+<span class="lineNum">     311 </span>            : TEMPLATE_DECL
+<span class="lineNum">     312 </span>            : const Node&lt;ValueT&gt;* CLASS_NAME::find(const KeyT&amp; key) const
+<span class="lineNum">     313 </span>            : {
+<span class="lineNum">     314 </span>            :     std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);
+<span class="lineNum">     315 </span>            :     const Node&lt;ValueT&gt;* node = begin();
+<span class="lineNum">     316 </span>            :     while (node != end()) {
+<span class="lineNum">     317 </span>            :         if (m_key_equal(node-&gt;m_value.load().first, key)) {
+<span class="lineNum">     318 </span>            :             return node;
+<span class="lineNum">     319 </span>            :         }
+<span class="lineNum">     320 </span>            :         node = node-&gt;m_next;
+<span class="lineNum">     321 </span>            :     }
+<span class="lineNum">     322 </span>            :     return node;
+<span class="lineNum">     323 </span>            : }
+<span class="lineNum">     324 </span>            : 
+<span class="lineNum">     325 </span>            : /*
+<span class="lineNum">     326 </span>            :  * Erase
+<span class="lineNum">     327 </span>            :  * Erases the node with the key if such one exists
+<a name="328"><span class="lineNum">     328 </span>            :  */</a>
+<span class="lineNum">     329 </span>            : TEMPLATE_DECL
+<span class="lineNum">     330 </span><span class="lineCov">          3 : void CLASS_NAME::erase(const KeyT&amp; key)</span>
+<span class="lineNum">     331 </span>            : {
+<span class="lineNum">     332 </span><span class="lineCov">          3 :     erase(find(key));</span>
+<span class="lineNum">     333 </span><span class="lineCov">          3 : }</span>
+<span class="lineNum">     334 </span>            : 
+<span class="lineNum">     335 </span>            : /*
+<span class="lineNum">     336 </span>            :  * Erase
+<span class="lineNum">     337 </span>            :  * Erases the node
+<a name="338"><span class="lineNum">     338 </span>            :  */</a>
+<span class="lineNum">     339 </span>            : TEMPLATE_DECL
+<span class="lineNum">     340 </span><span class="lineCov">       2037 : void CLASS_NAME::erase(Node&lt;ValueT&gt;* node)</span>
+<span class="lineNum">     341 </span>            : {
+<span class="lineNum">     342 </span><span class="lineCov">       2037 :     if (node == m_end) {</span>
+<span class="lineNum">     343 </span><span class="lineCov">          1 :         return;</span>
+<span class="lineNum">     344 </span>            :     }
+<span class="lineNum">     345 </span><span class="lineCov">       4072 :     std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);</span>
+<span class="lineNum">     346 </span><span class="lineCov">       2036 :     node-&gt;m_next-&gt;m_prev = node-&gt;m_prev;</span>
+<span class="lineNum">     347 </span><span class="lineCov">       2036 :     node-&gt;m_prev-&gt;m_next = node-&gt;m_next;</span>
+<span class="lineNum">     348 </span><span class="lineCov">       2036 :     delete node;</span>
+<span class="lineNum">     349 </span><span class="lineCov">       2036 :     node = nullptr;</span>
+<span class="lineNum">     350 </span><span class="lineCov">       2036 :     --m_size;</span>
+<span class="lineNum">     351 </span>            : }
+<span class="lineNum">     352 </span>            : 
+<span class="lineNum">     353 </span>            : /*
+<span class="lineNum">     354 </span>            :  * Erases all nodes
+<a name="355"><span class="lineNum">     355 </span>            :  */</a>
+<span class="lineNum">     356 </span>            : TEMPLATE_DECL
+<span class="lineNum">     357 </span><span class="lineCov">        410 : void CLASS_NAME::clear()</span>
+<span class="lineNum">     358 </span>            : {
+<span class="lineNum">     359 </span><span class="lineCov">        410 :     Node&lt;ValueT&gt;* node = nullptr;</span>
+<span class="lineNum">     360 </span><span class="lineCov">       4478 :     while ((node = begin()) != end()) {</span>
+<span class="lineNum">     361 </span><span class="lineCov">       2034 :         erase(node);</span>
+<span class="lineNum">     362 </span>            :     }
+<span class="lineNum">     363 </span><span class="lineCov">        410 : }</span>
+<span class="lineNum">     364 </span>            : 
+<span class="lineNum">     365 </span>            : /*
+<span class="lineNum">     366 </span>            :  * Returns the number of elements
+<a name="367"><span class="lineNum">     367 </span>            :  */</a>
+<span class="lineNum">     368 </span>            : TEMPLATE_DECL
+<span class="lineNum">     369 </span><span class="lineCov">        140 : std::size_t CLASS_NAME::size() const</span>
+<span class="lineNum">     370 </span>            : {
+<span class="lineNum">     371 </span><span class="lineCov">        140 :     return m_size;</span>
+<span class="lineNum">     372 </span>            : }
+<span class="lineNum">     373 </span>            : 
+<span class="lineNum">     374 </span>            : /*
+<span class="lineNum">     375 </span>            :  * Returns true if the bucket is empty and false otherwise
+<a name="376"><span class="lineNum">     376 </span>            :  */</a>
+<span class="lineNum">     377 </span>            : TEMPLATE_DECL
+<span class="lineNum">     378 </span><span class="lineCov">         82 : bool CLASS_NAME::empty() const</span>
+<span class="lineNum">     379 </span>            : {
+<span class="lineNum">     380 </span><span class="lineCov">        164 :     std::lock_guard&lt;std::recursive_mutex&gt; lck(m_mutex);</span>
+<span class="lineNum">     381 </span><span class="lineCov">        164 :     return begin() == end();</span>
+<span class="lineNum">     382 </span>            : }
+<span class="lineNum">     383 </span>            : 
+<span class="lineNum">     384 </span>            : /*
+<span class="lineNum">     385 </span>            :  * Returns a pointer to the first node
+<a name="386"><span class="lineNum">     386 </span>            :  */</a>
+<span class="lineNum">     387 </span>            : TEMPLATE_DECL
+<span class="lineNum">     388 </span><span class="lineCov">       4485 : Node&lt;ValueT&gt;* CLASS_NAME::begin()</span>
+<span class="lineNum">     389 </span>            : {
+<span class="lineNum">     390 </span><span class="lineCov">       4485 :     return m_end-&gt;m_next;</span>
+<span class="lineNum">     391 </span>            : }
+<a name="392"><span class="lineNum">     392 </span>            : </a>
+<span class="lineNum">     393 </span>            : TEMPLATE_DECL
+<span class="lineNum">     394 </span><span class="lineCov">        142 : const Node&lt;ValueT&gt;* CLASS_NAME::begin() const</span>
+<span class="lineNum">     395 </span>            : {
+<span class="lineNum">     396 </span><span class="lineCov">        142 :     return m_end-&gt;m_next;</span>
+<span class="lineNum">     397 </span>            : }
+<span class="lineNum">     398 </span>            : 
+<span class="lineNum">     399 </span>            : /*
+<span class="lineNum">     400 </span>            :  * Returns a pointer to the dummy nil node
+<a name="401"><span class="lineNum">     401 </span>            :  */</a>
+<span class="lineNum">     402 </span>            : TEMPLATE_DECL
+<span class="lineNum">     403 </span><span class="lineCov">     106513 : Node&lt;ValueT&gt;* CLASS_NAME::end()</span>
+<span class="lineNum">     404 </span>            : {
+<span class="lineNum">     405 </span><span class="lineCov">     106513 :     return m_end;</span>
+<span class="lineNum">     406 </span>            : }
+<a name="407"><span class="lineNum">     407 </span>            : </a>
+<span class="lineNum">     408 </span>            : TEMPLATE_DECL
+<span class="lineNum">     409 </span><span class="lineCov">        158 : const Node&lt;ValueT&gt;* CLASS_NAME::end() const</span>
+<span class="lineNum">     410 </span>            : {
+<span class="lineNum">     411 </span><span class="lineCov">        158 :     return m_end;</span>
+<span class="lineNum">     412 </span>            : }
+<span class="lineNum">     413 </span>            : 
+<span class="lineNum">     414 </span>            : #undef TEMPLATE_DECL
+<span class="lineNum">     415 </span>            : #undef CLASS_NAME
+<span class="lineNum">     416 </span>            : 
+<span class="lineNum">     417 </span>            : } // namespace thread_safe
+</pre>
+      </td>
+    </tr>
+  </table>
+  <br>
+
+  <table width="100%" border=0 cellspacing=0 cellpadding=0>
+    <tr><td class="ruler"><img src="../../../../../glass.png" width=3 height=3 alt=""></td></tr>
+    <tr><td class="versionInfo">Generated by: <a href="http://ltp.sourceforge.net/coverage/lcov.php" target="_parent">LCOV version 1.12</a></td></tr>
+  </table>
+  <br>
+
+</body>
+</html>
